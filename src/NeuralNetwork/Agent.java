@@ -1,38 +1,46 @@
 package NeuralNetwork;
 
-public class Agent
+import java.io.*;
+import java.util.Random;
+
+public class Agent implements Serializable
 {
-    private int _layerCount;
+    private int _hiddenLayerCount;
 
     private Matrix[] _weight;
     private Matrix[] _bias;
     private Matrix _inputActivation;
 
-    public Agent(int inputSize, int hiddenSize, int outputSize, int layerCount) throws Exception
+    public Agent(int inputSize, int outputSize, int hiddenLayerSize,  int hiddenLayerCount) throws Exception
     {
-        if(inputSize < 1 || inputSize <= hiddenSize || hiddenSize <= outputSize)
+        if(inputSize < 1 || hiddenLayerCount < 1 || inputSize <= hiddenLayerSize || hiddenLayerSize <= outputSize)
             throw new Exception("Sizes are invalid.");
 
-        if(layerCount < 3)
-            throw new Exception("Network is too small.");
-
-        _layerCount = layerCount;
+        _hiddenLayerCount = hiddenLayerCount;
         _inputActivation = new Matrix(inputSize, 1);
 
-        _weight = new Matrix[layerCount];
-        _bias = new Matrix[layerCount];
+        _weight = new Matrix[hiddenLayerCount + 1];
+        _bias = new Matrix[hiddenLayerCount + 1];
 
-        _weight[0] = new Matrix(hiddenSize, inputSize);
-        _bias[0] = new Matrix(hiddenSize, 1);
+        _weight[0] = new Matrix(hiddenLayerSize, inputSize);
+        _bias[0] = new Matrix(hiddenLayerSize, 1);
 
-        for(var index = 1; index < layerCount - 1; index++)
+        for(var index = 1; index < hiddenLayerCount - 1; index++)
         {
-            _weight[index] = new Matrix(hiddenSize, hiddenSize);
-            _bias[index] = new Matrix(hiddenSize, 1);
+            _weight[index] = new Matrix(hiddenLayerSize, hiddenLayerSize);
+            _bias[index] = new Matrix(hiddenLayerSize, 1);
         }
 
-        _weight[layerCount - 1] = new Matrix(outputSize, hiddenSize);
-        _bias[layerCount - 1] = new Matrix(outputSize, 1);
+        _weight[hiddenLayerCount - 1] = new Matrix(outputSize, hiddenLayerSize);
+        _bias[hiddenLayerCount - 1] = new Matrix(outputSize, 1);
+
+        var random = new Random(System.currentTimeMillis());
+
+        for(var index = 0; index < hiddenLayerCount; index++)
+        {
+            _weight[index].applyFunction(x -> random.nextDouble());
+            _bias[index].applyFunction(x -> random.nextDouble());
+        }
     }
 
     public void setInput(double[] data) throws Exception
@@ -48,12 +56,35 @@ public class Agent
     {
         var value = _inputActivation;
 
-        for(var index = 0; index < _layerCount; index++)
+        for(var index = 0; index < _hiddenLayerCount; index++)
         {
             value = _weight[index].multiply(value).add(_bias[index]);
             value.applyFunction(x -> 1 / (1 + Math.pow(Math.E, (-1 * x))));
         }
 
         return value;
+    }
+
+    public byte[] toByteArray() throws Exception
+    {
+        var stream = new ByteArrayOutputStream();
+        var output = new ObjectOutputStream(stream);
+
+        output.writeObject(this);
+        output.flush();
+
+        var value = stream.toByteArray();
+
+        stream.close();
+
+        return value;
+    }
+
+    public static Agent fromByteArray(byte[] data) throws Exception
+    {
+        var stream = new ByteArrayInputStream(data);
+        var input = new ObjectInputStream(stream);
+
+        return (Agent)input.readObject();
     }
 }

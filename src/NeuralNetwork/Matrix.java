@@ -1,6 +1,8 @@
 package NeuralNetwork;
 
-public class Matrix
+import java.io.Serializable;
+
+public class Matrix implements Serializable
 {
     private double[][] _data;
     private int _height;
