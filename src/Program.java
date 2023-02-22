@@ -1,11 +1,8 @@
-import NeuralNetwork.*;
-import java.util.Random;
-
 public class Program
 {
-    public static void main(String[] args)
+    public static void main(String[] args) throws Exception
     {
         System.out.println("hello world\n");
-        System.getenv("NeuralNetworkConnectionString");
+        var connectionString = System.getenv("NeuralNetworkConnectionString");
     }
 }
