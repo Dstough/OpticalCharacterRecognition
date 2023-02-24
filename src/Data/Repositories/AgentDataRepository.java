@@ -2,7 +2,6 @@ package Data.Repositories;
 
 import Data.Objects.AgentData;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 
 public class AgentDataRepository
 {

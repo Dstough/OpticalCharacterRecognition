@@ -43,6 +43,13 @@ public class Agent implements Serializable
         }
     }
 
+    public void setInput(Matrix data) throws Exception
+    {
+        if(_inputActivation.getHeight() != data.getHeight() || data.getWidth() != 1)
+            throw new Exception("Matrix size is invalid.");
+
+        _inputActivation = data;
+    }
     public void setInput(double[] data) throws Exception
     {
         if(data.length != _inputActivation.getHeight())
@@ -86,5 +93,13 @@ public class Agent implements Serializable
         var input = new ObjectInputStream(stream);
 
         return (Agent)input.readObject();
+    }
+
+    public void train(TrainingData trainingData) throws Exception
+    {
+        this.setInput(trainingData.getInputData());
+        var cost = this.getOutput().subtract(trainingData.getExpectedOutputData());
+
+        //TODO: finish the training for this set here.
     }
 }

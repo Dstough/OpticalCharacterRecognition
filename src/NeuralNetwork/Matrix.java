@@ -112,6 +112,20 @@ public class Matrix implements Serializable
         return value;
     }
 
+    public Matrix subtract(Matrix target) throws Exception
+    {
+        if(this.getHeight() != target.getHeight() || this.getWidth() != target.getWidth())
+            throw new Exception("Matrices are incompatible for this operation.");
+
+        var value = new Matrix(this.getHeight(), this.getWidth());
+
+        for(var row = 0; row < this.getHeight(); row++)
+            for(var column = 0; column < this.getWidth(); column++)
+                value.setElementAt(row, column, this.elementAt(row,column) - target.elementAt(row, column));
+
+        return value;
+    }
+
     public void applyFunction(MatrixFunction function) throws Exception
     {
         for(var row = 0; row < this.getHeight(); row++)
