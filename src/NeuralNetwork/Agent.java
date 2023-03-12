@@ -9,7 +9,7 @@ public class Agent implements Serializable
 
     private Matrix[] _weight;
     private Matrix[] _bias;
-    private Matrix _inputActivation;
+    private Matrix[] _activation;
 
     public Agent(int inputSize, int outputSize, int hiddenLayerSize,  int hiddenLayerCount) throws Exception
     {
@@ -17,22 +17,25 @@ public class Agent implements Serializable
             throw new Exception("Sizes are invalid.");
 
         _hiddenLayerCount = hiddenLayerCount;
-        _inputActivation = new Matrix(inputSize, 1);
-
         _weight = new Matrix[hiddenLayerCount + 1];
         _bias = new Matrix[hiddenLayerCount + 1];
+        _activation = new Matrix[hiddenLayerCount + 2];
 
         _weight[0] = new Matrix(hiddenLayerSize, inputSize);
         _bias[0] = new Matrix(hiddenLayerSize, 1);
+        _activation[0] = new Matrix(inputSize, 1);
 
         for(var index = 1; index < hiddenLayerCount - 1; index++)
         {
             _weight[index] = new Matrix(hiddenLayerSize, hiddenLayerSize);
             _bias[index] = new Matrix(hiddenLayerSize, 1);
+            _activation[index] = new Matrix(hiddenLayerSize, 1);
         }
 
         _weight[hiddenLayerCount - 1] = new Matrix(outputSize, hiddenLayerSize);
         _bias[hiddenLayerCount - 1] = new Matrix(outputSize, 1);
+        _activation[hiddenLayerCount - 1] = new Matrix(hiddenLayerSize, 1);
+        _activation[hiddenLayerCount] = new Matrix(outputSize, 1);
 
         var random = new Random(System.currentTimeMillis());
 
@@ -45,28 +48,29 @@ public class Agent implements Serializable
 
     public void setInput(Matrix data) throws Exception
     {
-        if(_inputActivation.getHeight() != data.getHeight() || data.getWidth() != 1)
+        if(_activation[0].getHeight() != data.getHeight() || data.getWidth() != 1)
             throw new Exception("Matrix size is invalid.");
 
-        _inputActivation = data;
+        _activation[0] = data;
     }
     public void setInput(double[] data) throws Exception
     {
-        if(data.length != _inputActivation.getHeight())
+        if(data.length != _activation[0].getHeight())
             throw new Exception("Data size is invalid.");
 
-        for(var index = 0; index < _inputActivation.getHeight(); index++)
-            _inputActivation.setElementAt(index, 0, data[index]);
+        for(var index = 0; index < _activation[0].getHeight(); index++)
+            _activation[0].setElementAt(index, 0, data[index]);
     }
 
     public Matrix getOutput() throws Exception
     {
-        var value = _inputActivation;
+        var value = _activation[0];
 
         for(var index = 0; index < _hiddenLayerCount; index++)
         {
             value = _weight[index].multiply(value).add(_bias[index]);
             value.applyFunction(x -> 1 / (1 + Math.pow(Math.E, (-1 * x))));
+            _activation[index + 1] = value;
         }
 
         return value;
